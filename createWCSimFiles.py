@@ -113,7 +113,7 @@ def createWCSimFiles():
 
     OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./")
     macdir = os.path.join(OUTPUT_PATH, ParticleName, "mac")
-    outdir = os.path.join(OUTPUT_PATH, ParticleName, "out")
+    outdir = os.path.join(OUTPUT_PATH, ParticleName, "rootfiles")
     logdir = os.path.join(OUTPUT_PATH, ParticleName, "log")
     shelldir = os.path.join(OUTPUT_PATH, ParticleName, "shell")
     figdir = os.path.join(OUTPUT_PATH, ParticleName, "fig")
