@@ -32,11 +32,14 @@ def createWCSimFiles():
 
     curdir = os.getcwd()
 
+    # Environment variable NO_MNT controls the mntdir
+    NO_MNT = os.getenv("NO_MNT", "FALSE").upper() == "TRUE"
+
     # default parameters
     wcsimdir = "/opt/WCSim"
     geant4dir="/opt/geant4"
     wcsim_build_dir="/opt/WCSim/build"
-    mntdir="/mnt"
+    mntdir = "" if NO_MNT else "/mnt"
 
     sandbox = "wcsim_sandbox/"
     siffile = "softwarecontainer_v1.3.1.sif"
