@@ -30,18 +30,7 @@ def usage():
 def createWCSimFiles():
     '''Function to create mac files for WCSim'''
 
-    # make necessary directories
-    macdir = "mac"
-    outdir = "out"
-    logdir = "log"
-    shelldir = "shell"
-    figdir = "fig"
-
     curdir = os.getcwd()
-
-    for dir in [macdir,outdir,logdir,shelldir,figdir]:
-        if (not os.path.exists(dir)):
-            os.makedirs(dir)
 
     # default parameters
     wcsimdir = "/opt/WCSim"
@@ -121,6 +110,17 @@ def createWCSimFiles():
         if (opt in ("-d", "--cedar")):
             submit_cedar_jobs = True
             rapaccount = val.strip()
+
+    OUTPUT_PATH = os.getenv("OUTPUT_PATH", "./")
+    macdir = os.path.join(OUTPUT_PATH, ParticleName, "mac")
+    outdir = os.path.join(OUTPUT_PATH, ParticleName, "out")
+    logdir = os.path.join(OUTPUT_PATH, ParticleName, "log")
+    shelldir = os.path.join(OUTPUT_PATH, ParticleName, "shell")
+    figdir = os.path.join(OUTPUT_PATH, ParticleName, "fig")
+
+    for dir in [macdir, outdir, logdir, shelldir, figdir]:
+        if not os.path.exists(dir):
+            os.makedirs(dir)
 
     wCDSstring = "_wCDS" if useCDS else ""
     wCDSmac = "" if useCDS else "#"
