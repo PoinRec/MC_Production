@@ -155,7 +155,7 @@ def createWCSimFiles():
                                         ParticlePosx=ParticlePosx,ParticlePosy=ParticlePosy,ParticlePosz=ParticlePosz,
                                         ParticleKELow=ParticleKELow,ParticleKEHigh=ParticleKEHigh, 
                                         rmac=TankRadius, zmac=TankHalfz,
-                                        nevs=nevs,filename="%s/%s/wcsim%s%04i.root" % (mntdir,outdir,configString,i)))
+                                        nevs=nevs,filename="%s/wcsim%s%04i.root" % (os.path.join(mntdir, outdir) if mntdir else outdir, configString, i)))
         fo.close()
         fi.close()
         fi = open("template/tuning_parameters.mac",'r')
@@ -175,9 +175,9 @@ def createWCSimFiles():
         shFile = "%s/wcsim%s%04i.sh" % (shelldir,configString,i)
         fo = open(shFile, 'w')
         fo.write(shTemplate.substitute(geant4dir=geant4dir, wcsim_build_dir=wcsim_build_dir,
-                                   macfile="%s/%s/wcsim%s%04i.mac" % (mntdir,macdir,configString,i),
-                                   tuningfile="%s/%s/tuning_parameters%s%04i.mac" % (mntdir,macdir,configString,i),
-                                   logfile="%s/%s/wcsim%s%04i.log" % (mntdir,logdir,configString,i)))
+                                   macfile="%s/wcsim%s%04i.mac" % (os.path.join(mntdir, macdir) if mntdir else macdir, configString, i),
+                                   tuningfile="%s/tuning_parameters%s%04i.mac" % (os.path.join(mntdir, macdir) if mntdir else macdir, configString, i),
+                                   logfile="%s/wcsim%s%04i.log" % (os.path.join(mntdir, logdir) if mntdir else logdir, configString, i)))
         fo.close()
         fi.close()
 
@@ -196,7 +196,7 @@ def createWCSimFiles():
             pjFile = "%s/pjsub%s%04i.sh" % (pjdir,configString,i)
             fo = open(pjFile, 'w')
             fo.write(pjTemplate.substitute(curdir=curdir, mntdir=mntdir, siffile=sandbox,
-                                           shfile="%s/%s/wcsim%s%04i.sh" % (mntdir,shelldir,configString,i)))
+                                           shfile="%s/wcsim%s%04i.sh" % (os.path.join(mntdir, shelldir) if mntdir else shelldir, configString, i)))
             fo.close()
             fi.close()
 
@@ -209,6 +209,8 @@ def createWCSimFiles():
             print ("Submitting pjsub jobs on sukap")
             for i in range(nfiles):
                 # Remove in valid files
+                if NO_MNT:
+                    raise RuntimeError("NO_MNT is TRUE, but singularity execution with -B requires a valid mount point.")
                 com = subprocess.Popen("singularity exec -u -B ./:%s %s root -l -b -q %s/validation/RemoveInvalidFile.c\(\\\"%s/%s/wcsim%s%04i.root\\\",%i\)" % (mntdir,sandbox,mntdir,mntdir,outdir,configString,i,nevs), shell=True, 
                                         stdout = subprocess.PIPE, stderr=subprocess.PIPE, 
                                         close_fds=True)
@@ -248,6 +250,8 @@ def createWCSimFiles():
                     res, err = com.communicate()
                     # Remove in valid files
                     if int(res)==0:
+                        if NO_MNT:
+                            raise RuntimeError("NO_MNT is TRUE, but singularity execution with -B requires a valid mount point.")
                         com = subprocess.Popen("singularity exec -u -B ./:%s %s root -l -b -q %s/validation/RemoveInvalidFile.c\(\\\"%s/%s/wcsim%s%04i.root\\\",%i\)" % (mntdir,sandbox,mntdir,mntdir,outdir,configString,job_id[i][1],nevs), shell=True, 
                                             stdout = subprocess.PIPE, stderr=subprocess.PIPE, 
                                             close_fds=True)
@@ -262,6 +266,8 @@ def createWCSimFiles():
                     
         # Make validation plots
         if useBeam:
+            if NO_MNT:
+                raise RuntimeError("NO_MNT is TRUE, but singularity execution with -B requires a valid mount point.")
             print("singularity exec -u -B ./:%s %s root -l -b -q %s/validation/EventDisplay.c\(\\\"%s/%s/wcsim%s\*\[0-9\].root\\\"\)" % (mntdir,sandbox,mntdir,mntdir,outdir,configString_TChain))
             com = subprocess.Popen("singularity exec -u -B ./:%s %s root -l -b -q %s/validation/EventDisplay.c\(\\\"%s/%s/wcsim%s\*\[0-9\].root\\\"\)" % (mntdir,sandbox,mntdir,mntdir,outdir,configString_TChain), shell=True, 
                                     stdout = subprocess.PIPE, stderr=subprocess.PIPE, 
@@ -274,6 +280,8 @@ def createWCSimFiles():
                 print (res)
 
         else:
+            if NO_MNT:
+                raise RuntimeError("NO_MNT is TRUE, but singularity execution with -B requires a valid mount point.")
             com = subprocess.Popen("singularity exec -u -B ./:%s %s root -l -b -q %s/validation/VertexDistribution.c\(\\\"%s/%s/wcsim%s\*\[0-9\].root\\\"\)" % (mntdir,sandbox,mntdir,mntdir,outdir,configString), shell=True, 
                                     stdout = subprocess.PIPE, stderr=subprocess.PIPE, 
                                     close_fds=True)
@@ -301,7 +309,7 @@ def createWCSimFiles():
             slerr = "%s/slurm%s%04i" % (slerrdir,configString,i)
             fo = open(slFile, 'w')
             fo.write(slTemplate.substitute(account=rapaccount, curdir=curdir, mntdir=mntdir, siffile=siffile, sout=slout, serr=slerr,
-                                           shfile="%s/%s/wcsim%s%04i.sh" % (mntdir,shelldir,configString,i)))
+                                           shfile="%s/wcsim%s%04i.sh" % (os.path.join(mntdir, shelldir) if mntdir else shelldir, configString, i)))
             fo.close()
             fi.close()
 
