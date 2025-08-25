@@ -1,4 +1,10 @@
+
 R__LOAD_LIBRARY(/opt/WCSim/build/install/lib/libWCSimRoot.so)
+
+#include <cstdlib>
+#include <string>
+
+std::string GetFigDir(const std::string& prefix);
 
 void EventDisplay_SingleEvent(const char * fname, int evtID)
 {
@@ -232,18 +238,33 @@ void EventDisplay_SingleEvent(const char * fname, int evtID)
     TMarker m2(evtx,evty,29);
     m2.SetMarkerColor(kBlack);
     m2.Draw();
-    c1->SaveAs(Form("/mnt/fig/%sdisplay_%i.pdf",prefix.c_str(),evtID));
+    c1->SaveAs(Form("%s/%sdisplay_%i.pdf", GetFigDir(prefix).c_str(), prefix.c_str(), evtID));
 
     hist_timetof->GetXaxis()->SetTitle("Digi Time (ns)");
     hist_timetof_true->GetXaxis()->SetTitle("Raw Time (ns)");
 
     hist_timetof->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/%stimetof_%i.pdf",prefix.c_str(),evtID));
+    c1->SaveAs(Form("%s/%stimetof_%i.pdf", GetFigDir(prefix).c_str(), prefix.c_str(), evtID));
 
     hist_timetof_true->Draw("hist");
     //c1->SetLogy();
-    c1->SaveAs(Form("/mnt/fig/%stimetof_true_%i.pdf",prefix.c_str(),evtID));
+    c1->SaveAs(Form("%s/%stimetof_true_%i.pdf", GetFigDir(prefix).c_str(), prefix.c_str(), evtID));
 
     f->Close();
     t->Reset();
+}
+
+std::string GetFigDir(const std::string& prefix)
+{
+    const char* no_mnt_env = std::getenv("NO_MNT");
+    bool no_mnt = (no_mnt_env != nullptr) && (std::string(no_mnt_env) == "TRUE");
+
+    if (no_mnt)
+    {
+        std::string base_dir = "../fig";
+        std::string command = "mkdir -p " + base_dir;
+        system(command.c_str());
+        return base_dir;
+    }
+    return "/mnt/fig";
 }

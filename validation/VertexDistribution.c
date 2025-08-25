@@ -41,6 +41,17 @@ void VertexDistribution(const char * fname)
         prefix.erase(prefix.find_last_of("\\"),1);
     }
     if (char(prefix.back())!='_') prefix += "_";
+
+    const char* no_mnt_env = std::getenv("NO_MNT");
+    bool no_mnt = no_mnt_env && std::string(no_mnt_env) == "TRUE";
+    std::string figdir;
+    if (no_mnt) {
+        std::string root_dir = single_file_name.substr(0, single_file_name.find_last_of("/"));
+        figdir = root_dir + "/../fig/";
+    } else {
+        figdir = "/mnt/fig/";
+    }
+
     std::cout<<"prefix = "<<prefix<<std::endl;
 
     WCSimRootEvent* wcsimrootsuperevent = new WCSimRootEvent();
@@ -104,16 +115,16 @@ void VertexDistribution(const char * fname)
     TCanvas* c1 = new TCanvas();
 
     hist_vertices->Draw("box");
-    c1->SaveAs(Form("/mnt/fig/%svertices.pdf",prefix.c_str()));
+    c1->SaveAs((figdir + prefix + "vertices.pdf").c_str());
 
     hist_vertices_xy->Draw("colz");
-    c1->SaveAs(Form("/mnt/fig/%sverticesXY.pdf",prefix.c_str()));
+    c1->SaveAs((figdir + prefix + "verticesXY.pdf").c_str());
 
     hist_vertices_yz->Draw("colz");
-    c1->SaveAs(Form("/mnt/fig/%sverticesYZ.pdf",prefix.c_str()));
+    c1->SaveAs((figdir + prefix + "verticesYZ.pdf").c_str());
 
     hist_vertices_zx->Draw("colz");
-    c1->SaveAs(Form("/mnt/fig/%sverticesZX.pdf",prefix.c_str()));
+    c1->SaveAs((figdir + prefix + "verticesZX.pdf").c_str());
 
     f->Close();
     t->Reset();

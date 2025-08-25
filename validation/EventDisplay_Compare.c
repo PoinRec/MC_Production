@@ -1,5 +1,15 @@
 R__LOAD_LIBRARY(/opt/WCSim/build/install/lib/libWCSimRoot.so)
 
+const char* GetFigDir(const std::string& prefix) {
+    const char* no_mnt = getenv("NO_MNT");
+    if (no_mnt && std::string(no_mnt) == "TRUE") {
+        std::string base_dir = prefix.substr(0, prefix.find_last_of('/'));
+        return (base_dir + "/../fig").c_str();
+    }
+    const char* figdir = getenv("FIGDIR");
+    return figdir ? figdir : "/mnt/fig";
+}
+
 std::vector<TH1*> EventDisplay(const char * fname)
 {
     gStyle->SetOptStat(0);
@@ -234,17 +244,17 @@ std::vector<TH1*> EventDisplay(const char * fname)
     TMarker m2(evtx,evty,29);
     m2.SetMarkerColor(kBlack);
     m2.Draw();
-    c1->SaveAs(Form("/mnt/fig/%sdisplay.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s/%sdisplay.pdf", GetFigDir(prefix).c_str(), prefix.c_str()));
 
     hist_timetof->GetXaxis()->SetTitle("Digi Time (ns)");
     hist_timetof_true->GetXaxis()->SetTitle("Raw Time (ns)");
 
     hist_timetof->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/%stimetof.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s/%stimetof.pdf", GetFigDir(prefix).c_str(), prefix.c_str()));
 
     hist_timetof_true->Draw("hist");
     //c1->SetLogy();
-    c1->SaveAs(Form("/mnt/fig/%stimetof_true.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s/%stimetof_true.pdf", GetFigDir(prefix).c_str(), prefix.c_str()));
 
     hist_event_display->SetDirectory(0);
     hist_timetof->SetDirectory(0);
@@ -261,13 +271,15 @@ void EventDisplay_Compare(const char * fname1, const char * fname2, const char *
     std::vector<TH1*> hists1 = EventDisplay(fname1);
     std::vector<TH1*> hists2 = EventDisplay(fname2);
 
+    const char* figdir = GetFigDir(tag);
+
     TCanvas* c1 = new TCanvas();
 
     hists2[0]->Divide(hists1[0]);
     hists2[0]->GetZaxis()->SetRangeUser(0.5,1.5);
     hists2[0]->SetTitle("Ratio");
     hists2[0]->Draw("colz");
-    c1->SaveAs(Form("/mnt/fig/Compare_display_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_display_%s.pdf", figdir, tag));
     TH1D* hist_ratio = new TH1D("Ratio","Ratio",100,0.5,1.5);
     for (int i=1;i<=hists2[0]->GetNbinsX();i++)
         for (int j=1;j<=hists2[0]->GetNbinsY();j++)
@@ -278,27 +290,27 @@ void EventDisplay_Compare(const char * fname1, const char * fname2, const char *
     c1->SetGridx();
     c1->SetGridy();
     hist_ratio->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/Compare_display_ratio_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_display_ratio_%s.pdf", figdir, tag));
 
     hists1[1]->Draw("hist");
     hists2[1]->SetLineColor(kRed);
     hists2[1]->Draw("hist same");
-    c1->SaveAs(Form("/mnt/fig/Compare_timetof_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_timetof_%s.pdf", figdir, tag));
 
     hists2[1]->Divide(hists1[1]);
     hists2[1]->GetYaxis()->SetTitle("Ratio");
     hists2[1]->GetYaxis()->SetRangeUser(0,2);
     hists2[1]->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/Compare_timetof_ratio_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_timetof_ratio_%s.pdf", figdir, tag));
 
     hists1[2]->Draw("hist");
     hists2[2]->SetLineColor(kRed);
     hists2[2]->Draw("hist same");
-    c1->SaveAs(Form("/mnt/fig/Compare_timetof_true_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_timetof_true_%s.pdf", figdir, tag));
 
     hists2[2]->Divide(hists1[2]);
     hists2[2]->GetYaxis()->SetTitle("Ratio");
     hists2[2]->GetYaxis()->SetRangeUser(0,2);
     hists2[2]->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/Compare_timetof_true_ratio_%s.pdf",tag));
+    c1->SaveAs(Form("%s/Compare_timetof_true_ratio_%s.pdf", figdir, tag));
 }

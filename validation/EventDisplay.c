@@ -236,20 +236,30 @@ void EventDisplay(const char * fname)
     TMarker m2(evtx,evty,29);
     m2.SetMarkerColor(kBlack);
     m2.Draw();
-    c1->SaveAs(Form("/mnt/fig/%sdisplay.pdf",prefix.c_str()));
+    // Determine figure directory and create it if needed
+    const char* no_mnt_env = getenv("NO_MNT");
+    std::string figdir;
+    if (no_mnt_env != nullptr && std::string(no_mnt_env) == "TRUE") {
+        std::string parent_dir = single_file_name.substr(0, single_file_name.find_last_of("/"));
+        figdir = parent_dir + "/../fig/";
+    } else {
+        figdir = "/mnt/fig/";
+    }
+    gSystem->mkdir(figdir.c_str(), kTRUE);
+    c1->SaveAs(Form("%s%sdisplay.pdf",figdir.c_str(),prefix.c_str()));
 
     hist_timetof->GetXaxis()->SetTitle("Digi Time (ns)");
     hist_timetof_true->GetXaxis()->SetTitle("Raw Time (ns)");
 
     hist_timetof->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/%stimetof.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s%stimetof.pdf",figdir.c_str(),prefix.c_str()));
 
     hist_timetof_true->Draw("hist");
     //c1->SetLogy();
-    c1->SaveAs(Form("/mnt/fig/%stimetof_true.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s%stimetof_true.pdf",figdir.c_str(),prefix.c_str()));
 
     hist_NDigiHits->Draw("hist");
-    c1->SaveAs(Form("/mnt/fig/%sNDigiHits.pdf",prefix.c_str()));
+    c1->SaveAs(Form("%s%sNDigiHits.pdf",figdir.c_str(),prefix.c_str()));
 
     f->Close();
     t->Reset();
