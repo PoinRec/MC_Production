@@ -17,3 +17,6 @@ slerr/
 
 # pdf
 *.pdf
+
+# geofile
+geo*.txt
